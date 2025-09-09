@@ -1,0 +1,41 @@
+id: d7152dd4-98f0-40de-a973-58279e20180e
+name: ModifyUserAgentByDomain
+function: MATCH_AND_REPLACE_REQUEST
+location: PROXY_HTTP_HISTORY
+source: |+
+  // Get the current HTTP request
+  HttpRequest request = requestResponse.request();
+  
+  // Check if the request is within the project scope and has User-Agent
+  if (!request.isInScope() || !request.hasHeader("User-Agent")) {
+      return request;
+  }
+  
+  // Get the URL as lowercase string
+  String url = request.url().toLowerCase();
+  
+  // Remove scheme (http:// or https://)
+  if (url.startsWith("http://")) url = url.substring(7);
+  else if (url.startsWith("https://")) url = url.substring(8);
+  
+  // Extract host (up to first '/')
+  int slashIndex = url.indexOf("/");
+  String host = (slashIndex != -1) ? url.substring(0, slashIndex) : url;
+  
+  // Define the User-Agent for each domain
+  Map<String, String> domainUserAgents = new HashMap<>();
+  domainUserAgents.put("example.com", "value1");
+  domainUserAgents.put("example2.net", "value2");
+  domainUserAgents.put("example3.org", "value3");
+  
+  // Replace User-Agent if host matches a domain
+  for (Map.Entry<String, String> entry : domainUserAgents.entrySet()) {
+      String domain = entry.getKey();
+      String ua = entry.getValue();
+      if (host.endsWith(domain)) {
+          return request.withHeader("User-Agent", ua);
+      }
+  }
+  
+  // Return original request if no domain matched
+  return request;

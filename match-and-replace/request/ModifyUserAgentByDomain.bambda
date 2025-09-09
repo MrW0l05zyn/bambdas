@@ -24,7 +24,7 @@ source: |+
   
   // Define the User-Agent for each domain
   Map<String, String> domainUserAgents = new HashMap<>();
-  domainUserAgents.put("example.com", "value1");
+  domainUserAgents.put("example.com", "value");
   domainUserAgents.put("example2.net", "value2");
   domainUserAgents.put("example3.org", "value3");
   

@@ -1,0 +1,33 @@
+id: e54ee5fe-dc3e-4e0b-809e-464a1943d194
+name: AddCustomHeader
+function: MATCH_AND_REPLACE_REQUEST
+location: PROXY_HTTP_HISTORY
+source: |
+  // Get the current HTTP request
+  HttpRequest request = requestResponse.request();
+
+  // Only process requests that are within the project's defined scope
+  if (!request.isInScope()) {
+      return request;
+  }
+
+  // Configuration array for headers: {Name, Value, IsEnabled}
+  String[][] headerConfigs = {
+      { "X-Custom-Header1", "value1", "true" },
+      { "X-Custom-Header2", "value2", "false" },
+      { "X-Custom-Header3", "value3", "false" }
+  };
+
+  // Iterate through configurations and apply headers conditionally
+  for (String[] config : headerConfigs) {
+      String headerName = config[0];
+      String headerValue = config[1];
+      boolean isEnabled = "true".equalsIgnoreCase(config[2]);
+
+      // Only add the header if it is enabled and does not already exist in the request
+      if (isEnabled && !request.hasHeader(headerName)) {
+          request = request.withAddedHeader(headerName, headerValue);
+      }
+  }
+
+  return request;

@@ -3,6 +3,10 @@ name: AddCustomHeader
 function: MATCH_AND_REPLACE_REQUEST
 location: PROXY_HTTP_HISTORY
 source: |
+  /**
+  * Adds enabled custom headers to in-scope HTTP requests.
+  * @author MrW0l05zyn
+  **/
   // Get the current HTTP request
   HttpRequest request = requestResponse.request();
 

@@ -1,0 +1,38 @@
+id: ce353d1e-0bd4-4a00-9317-d25ec6f6f140
+name: EncodeResponseBodyToBase64
+function: CUSTOM_ACTION
+location: REPEATER
+source: |
+  // Retrieve the HTTP response
+  var res = requestResponse.response();
+
+  // Exit if there is no response
+  if (res == null) {
+      return;
+  }
+
+  // Exit if the response body is missing or empty
+  if (res.body() == null || res.body().length() == 0) {
+      api.logging().logToOutput("Response body is empty, nothing to encode.");
+      return;
+  }
+
+  // Convert response body to Base64
+  byte[] bodyBytes = res.body().getBytes();
+  String base64Body = java.util.Base64.getEncoder().encodeToString(bodyBytes);
+
+  // Copy Base64 result to system clipboard
+  try {
+      java.awt.Toolkit.getDefaultToolkit()
+              .getSystemClipboard()
+              .setContents(
+                  new java.awt.datatransfer.StringSelection(base64Body),
+                  null
+              );
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to copy to clipboard: " + e.getMessage());
+  }
+
+  // Log Base64 output
+  api.logging().logToOutput(base64Body);
+  api.logging().logToOutput("Base64 response body copied to clipboard.");

@@ -2,7 +2,7 @@ id: d7152dd4-98f0-40de-a973-58279e20180e
 name: ModifyUserAgentByDomain
 function: MATCH_AND_REPLACE_REQUEST
 location: PROXY_HTTP_HISTORY
-source: |+
+source: |
   // Get the current HTTP request
   HttpRequest request = requestResponse.request();
   

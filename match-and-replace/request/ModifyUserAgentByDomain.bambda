@@ -3,6 +3,10 @@ name: ModifyUserAgentByDomain
 function: MATCH_AND_REPLACE_REQUEST
 location: PROXY_HTTP_HISTORY
 source: |
+  /**
+  * Replaces the User-Agent header based on the request domain.
+  * @author MrW0l05zyn
+  **/
   // Get the current HTTP request
   HttpRequest request = requestResponse.request();
   

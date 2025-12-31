@@ -1,0 +1,35 @@
+id: 96eefd20-daee-4b35-84e3-4639437d0e25
+name: ExportResponseToPDF
+function: CUSTOM_ACTION
+location: REPEATER
+source: |
+  // Base path and filename
+  String basePath = "/Users/<username>/Downloads/";
+  String baseName = "output";
+
+  // Generate unique filename using current date and time
+  String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+  String outputPath = basePath + baseName + "_" + timestamp + ".pdf";
+
+  // Retrieve the HTTP response
+  var res = requestResponse.response();
+
+  // Exit if there is no response
+  if (res == null) return;
+
+  // Exit if the response body is missing or empty
+  if (res.body() == null || res.body().length() == 0) {
+      api.logging().logToOutput("Response body is empty, nothing to save.");
+      return;
+  }
+
+  // Get raw bytes from response body
+  byte[] bodyBytes = res.body().getBytes();
+
+  // Write bytes directly to PDF
+  try (java.io.FileOutputStream fos = new java.io.FileOutputStream(outputPath)) {
+      fos.write(bodyBytes);
+      api.logging().logToOutput("PDF file saved successfully: " + outputPath);
+  } catch (java.io.IOException e) {
+      api.logging().logToOutput("Failed to save PDF file: " + e.getMessage());
+  }

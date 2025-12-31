@@ -3,6 +3,10 @@ name: ExportResponseToPDF
 function: CUSTOM_ACTION
 location: REPEATER
 source: |
+  /**
+  * Exports the HTTP response body to a local PDF file.
+  * @author MrW0l05zyn
+  **/
   // Base path and filename
   String basePath = "/Users/<username>/Downloads/";
   String baseName = "output";

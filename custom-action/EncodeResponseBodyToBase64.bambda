@@ -3,6 +3,10 @@ name: EncodeResponseBodyToBase64
 function: CUSTOM_ACTION
 location: REPEATER
 source: |
+  /**
+  * Encodes the HTTP response body to Base64 and copies it to the clipboard.
+  * @author MrW0l05zyn
+  **/
   // Retrieve the HTTP response
   var res = requestResponse.response();
 

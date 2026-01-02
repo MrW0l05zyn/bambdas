@@ -8,12 +8,12 @@ source: |
   * @author MrW0l05zyn
   **/
   // Base path and filename
-  String basePath = "/Users/<username>/Downloads/";
-  String baseName = "output";
+  String BASE_PATH = "/Users/<username>/Downloads/";
+  String BASE_NAME = "output";
 
   // Generate unique filename using current date and time
   String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-  String outputPath = basePath + baseName + "_" + timestamp + ".pdf";
+  String outputPath = BASE_PATH + BASE_NAME + "_" + timestamp + ".pdf";
 
   // Retrieve the HTTP response
   var res = requestResponse.response();

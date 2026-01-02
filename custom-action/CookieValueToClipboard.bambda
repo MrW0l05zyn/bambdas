@@ -1,0 +1,75 @@
+id: 39a5174e-60bd-4bca-a0fb-fdd1233618f3
+name: CookieValueToClipboard
+function: CUSTOM_ACTION
+location: REPEATER
+source: |
+  /**
+  * Extracts a configurable cookie from the HTTP response and copies its value to the clipboard.
+  * @author MrW0l05zyn
+  **/
+  String COOKIE_NAME = "AUTH";
+
+  // Retrieve the HTTP response
+  var res = requestResponse.response();
+
+  // Exit if there is no response
+  if (res == null) {
+      return;
+  }
+
+  // Retrieve response headers
+  var headers = res.headers();
+
+  // Exit if there are no headers
+  if (headers == null || headers.isEmpty()) {
+      api.logging().logToOutput("Response has no headers.");
+      return;
+  }
+
+  // Cookie value holder
+  String cookieValue = "";
+
+  // Iterate through headers looking for Set-Cookie
+  for (int i = 0; i < headers.size(); i++) {
+      var header = headers.get(i);
+      // Check header name
+      if (header.name().equalsIgnoreCase("Set-Cookie")) {
+          String value = header.value();
+          // Look for COOKIE_NAME
+          int cookieIndex = value.indexOf(COOKIE_NAME + "=");
+          if (cookieIndex != -1) {
+              // Start after "COOKIE_NAME="
+              int start = cookieIndex + COOKIE_NAME.length() + 1;
+              // End at ';' or end of string
+              int end = value.indexOf(";", start);
+              if (end == -1) {
+                  end = value.length();
+              }
+              cookieValue = value.substring(start, end);
+              break;
+          }
+      }
+  }
+
+  // Exit if cookie was not found
+  if (cookieValue.equals("")) {
+      api.logging().logToOutput("Cookie not found: " + COOKIE_NAME);
+      return;
+  }
+
+  // Copy cookie value to system clipboard
+  try {
+      java.awt.Toolkit.getDefaultToolkit()
+          .getSystemClipboard()
+          .setContents(
+              new java.awt.datatransfer.StringSelection(cookieValue),
+              null
+          );
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to copy cookie to clipboard: " + e.getMessage());
+      return;
+  }
+
+  // Log result
+  api.logging().logToOutput("Value of cookie " + COOKIE_NAME + " copied to clipboard:");
+  api.logging().logToOutput(cookieValue);

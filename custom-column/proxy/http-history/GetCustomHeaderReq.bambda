@@ -1,0 +1,13 @@
+id: 6ef4dc58-9349-4688-b4eb-76b96672e264
+name: GetCustomHeaderReq
+function: CUSTOM_COLUMN
+location: PROXY_HTTP_HISTORY
+source: |
+  /**
+  * Returns the value of a specific HTTP request header.
+  * If the header is not present, returns an empty string.
+  * @author MrW0l05zyn
+  **/
+  String HTTP_HEADER = "<HTTP-HEADER>";
+  String headerValue = requestResponse.request().headerValue(HTTP_HEADER);
+  return headerValue == null ? "" : headerValue;

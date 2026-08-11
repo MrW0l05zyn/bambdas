@@ -1,0 +1,84 @@
+id: 9ef6bc09-5345-408f-841f-768d8d27420c
+name: ExportResponseJSONToPDF
+function: CUSTOM_ACTION
+location: REPEATER
+source: |
+  /**
+  * Exports the HTTP response body JSON to a local PDF file.
+  * @author MrW0l05zyn
+  **/
+  // Base path and filename
+  String BASE_PATH = "/Users/<username>/Downloads/";
+  String BASE_NAME = "output";
+  boolean AUTO_OPEN_PDF = true;
+
+  // Dot-separated path to the Base64 value
+  String BASE64_JSON_PATH = "report.base64";
+
+  // Retrieve the HTTP response
+  var res = requestResponse.response();
+
+  // Exit if there is no response
+  if (res == null) return;
+
+  // Exit if the response body is missing or empty
+  if (res.body() == null || res.body().length() == 0) {
+      api.logging().logToOutput("Response body is empty, nothing to save.");
+      return;
+  }
+
+  // Parse the response body JSON
+  var jsonNode = burp.api.montoya.utilities.json.JsonNode.jsonNode(res.bodyToString());
+
+  // Navigate to the configured Base64 value
+  for (String property : BASE64_JSON_PATH.split("\\.")) {
+      jsonNode = jsonNode.asObject().get(property);
+
+      if (jsonNode == null) {
+          api.logging().logToOutput("JSON path not found: " + BASE64_JSON_PATH);
+          return;
+      }
+  }
+
+  // Decode Base64 PDF value
+  String base64Value = jsonNode.asString().replaceAll("\\s+", "");
+  byte[] bodyBytes;
+
+  try {
+      bodyBytes = java.util.Base64.getDecoder().decode(base64Value);
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to decode Base64: " + e.getMessage());
+      return;
+  }
+
+  // Generate unique filename using current date and time
+  String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+  String outputPath = BASE_PATH + BASE_NAME + "_" + timestamp + ".pdf";
+
+  // Write bytes directly to PDF
+  try (java.io.FileOutputStream fos = new java.io.FileOutputStream(outputPath)) {
+      fos.write(bodyBytes);
+      api.logging().logToOutput("PDF file saved successfully: " + outputPath);
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to save PDF file: " + e.getMessage());
+      return;
+  }
+
+  // Open PDF automatically
+  if (AUTO_OPEN_PDF) {
+      try {
+          if (java.awt.Desktop.isDesktopSupported()) {
+              var desktop = java.awt.Desktop.getDesktop();
+
+              if (desktop.isSupported(java.awt.Desktop.Action.OPEN)) {
+                  desktop.open(new java.io.File(outputPath));
+              } else {
+                  api.logging().logToOutput("Automatic PDF opening is not supported.");
+              }
+          } else {
+              api.logging().logToOutput("Automatic PDF opening is not supported.");
+          }
+      } catch (Exception e) {
+          api.logging().logToOutput("Failed to open PDF file: " + e.getMessage());
+      }
+  }

@@ -1,0 +1,80 @@
+id: 4150edc2-43cd-49e5-b677-dd725b282875
+name: TokenValueToClipboard
+function: CUSTOM_ACTION
+location: REPEATER
+source: |
+  /**
+  * Extracts a configurable token from the HTTP response JSON and copies its value to the clipboard.
+  * @author MrW0l05zyn
+  **/
+  // Dot-separated path to the token value
+  String TOKEN_JSON_PATH = "access_token";
+
+  // Retrieve the HTTP response
+  var res = requestResponse.response();
+
+  // Exit if there is no response
+  if (res == null) {
+      return;
+  }
+
+  // Exit if the response body is missing or empty
+  if (res.body() == null || res.body().length() == 0) {
+      api.logging().logToOutput("Response body is empty.");
+      return;
+  }
+
+  // Parse the response body JSON
+  burp.api.montoya.utilities.json.JsonNode jsonNode;
+  try {
+      jsonNode = burp.api.montoya.utilities.json.JsonNode.jsonNode(res.bodyToString());
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to parse response JSON: " + e.getMessage());
+      return;
+  }
+
+  // Navigate to the configured token value
+  for (String property : TOKEN_JSON_PATH.split("\\.")) {
+      if (!jsonNode.isObject()) {
+          api.logging().logToOutput("Invalid JSON path: " + TOKEN_JSON_PATH);
+          return;
+      }
+
+      jsonNode = jsonNode.asObject().get(property);
+      if (jsonNode == null) {
+          api.logging().logToOutput("JSON path not found: " + TOKEN_JSON_PATH);
+          return;
+      }
+  }
+
+  // Exit if token value is not a string
+  if (!jsonNode.isString()) {
+      api.logging().logToOutput("Token value is not a string: " + TOKEN_JSON_PATH);
+      return;
+  }
+
+  // Token value holder
+  String tokenValue = jsonNode.asString();
+
+  // Exit if token value is empty
+  if (tokenValue.equals("")) {
+      api.logging().logToOutput("Token value is empty: " + TOKEN_JSON_PATH);
+      return;
+  }
+
+  // Copy token value to system clipboard
+  try {
+      java.awt.Toolkit.getDefaultToolkit()
+          .getSystemClipboard()
+          .setContents(
+              new java.awt.datatransfer.StringSelection(tokenValue),
+              null
+          );
+  } catch (Exception e) {
+      api.logging().logToOutput("Failed to copy token to clipboard: " + e.getMessage());
+      return;
+  }
+
+  // Log result
+  api.logging().logToOutput("Value of token " + TOKEN_JSON_PATH + " copied to clipboard:");
+  api.logging().logToOutput(tokenValue);
